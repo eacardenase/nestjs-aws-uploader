@@ -1,6 +1,6 @@
 import { APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { UploaderService } from './uploader.service';
@@ -9,9 +9,14 @@ import { UploaderController } from './uploader.controller';
 @Module({
   imports: [
     ConfigModule,
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 3,
+
+    ThrottlerModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        ttl: configService.getOrThrow('UPLOAD_RATE_TTL'),
+        limit: configService.getOrThrow('UPLOAD_RATE_LIMIT'),
+      }),
+      inject: [ConfigService],
+      imports: [ConfigModule],
     }),
   ],
   controllers: [UploaderController],
