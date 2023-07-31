@@ -23,7 +23,7 @@ export class UploaderController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(
+  async uploadFile(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -34,7 +34,7 @@ export class UploaderController {
     )
     file: Express.Multer.File,
   ) {
-    console.log(file);
+    await this.uploaderService.upload(file.originalname, file.buffer);
   }
 
   @Get()
